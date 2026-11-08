@@ -1,0 +1,84 @@
+# Data Contract для ответа Launch Library 2 (The Space Devs)
+# Эндпоинт: GET https://ll.thespacedevs.com/2.2.0/launch/
+#
+# Контракт описывает структуру ОДНОГО элемента из массива results.
+# Валидатор (scripts/api_contract_validator.py) проверяет каждый элемент
+# перед загрузкой в PostgreSQL.
+
+contract:
+  version: "1.0"
+  dataset: launch_library_launches
+  api_endpoint: "https://ll.thespacedevs.com/2.2.0/launch/"
+  description: >
+    Список космических запусков (Launch Library 2). 
+    Один элемент = один запуск. Валидируем ключевые поля верхнего уровня 
+    и вложенные объекты (status, launch_service_provider).
+
+  owner:
+    name: Pavel Onishchenko
+    email: pavloni@mail.ru
+
+  # Поля верхнего уровня
+  fields:
+    id:
+      type: string
+      nullable: false
+      description: Уникальный идентификатор запуска (UUID)
+      constraints:
+        - name: uuid_format
+          rule: "len({val}) == 36 and {val}[8] == '-'"
+
+    name:
+      type: string
+      nullable: false
+      description: Название миссии
+      constraints:
+        - name: not_empty
+          rule: "len({val}) > 0"
+
+    net:
+      type: string
+      nullable: false
+      description: Время запуска (Net) в формате ISO 8601
+      constraints:
+        - name: iso_8601
+          rule: "len({val}) >= 19 and {val}[4] == '-' and {val}[10] == 'T'"
+
+    probability:
+      type: number
+      nullable: true
+      description: Вероятность успешного запуска (может быть null)
+      constraints:
+        - name: range_0_100
+          rule: "{val} is None or (0 <= {val} <= 100)"
+
+    hashtag:
+      type: string
+      nullable: true
+      description: Хэштег миссии (может быть null)
+
+  # Вложенные объекты (проверяем наличие и типы внутри)
+  nested_objects:
+    status:
+      required: true
+      fields:
+        abbrev:
+          type: string
+          nullable: false
+          description: Краткий статус (например, "Success")
+        id:
+          type: integer
+          nullable: false
+          description: ID статуса
+
+    launch_service_provider:
+      required: true
+      fields:
+        name:
+          type: string
+          nullable: false
+          description: Название провайдера (например, "Soviet Space Program")
+        type:
+          type: string
+          nullable: false
+          description: Тип провайдера (например, "Government")
