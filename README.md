@@ -12,7 +12,7 @@ Pet-проект: E2E-пайплайн с валидацией внешнего 
 
 ![Упавший DAG](assets/dag_failed.png)
 
-**При нарушении контракта Airflow падает и отправляет Email-алерт (настроен SMTP Mail.ru
+При нарушении контракта Airflow падает и отправляет Email-алерт (настроен SMTP Mail.ru)
 
 ![Alert на email](assets/email_alert.png)
 
